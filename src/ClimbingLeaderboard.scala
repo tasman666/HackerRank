@@ -8,10 +8,7 @@ object ClimbingLeaderboard {
       throw new IllegalArgumentException("Wrong input")
     }
 
-    alice.map(aliceValue => {
-      position(aliceValue, 1, scores)
-    })
-
+    climbingLeaderboard(scores, alice, Array())
   }
 
   private def invalidArray(array: Array[Int]) = {
@@ -19,7 +16,18 @@ object ClimbingLeaderboard {
   }
 
   @scala.annotation.tailrec
-  private def position(aliceValue: Int, positionNr: Int, scores: Array[Int]): Int = {
+  private def climbingLeaderboard(scores: Array[Int], alice: Array[Int], result: Array[Int]): Array[Int] = {
+    alice match {
+      case Array(firstAliceValue, _*) =>
+        val positionResult = positionWithIndex(firstAliceValue, 1, 0, scores)
+        //println("index " + positionResult)
+        climbingLeaderboard(scores.take(positionResult._2 + 1), alice.tail, result  :+ positionResult._1)
+      case _ => result
+    }
+  }
+
+  @scala.annotation.tailrec
+  private def positionWithIndex(aliceValue: Int, positionNr: Int, index: Int, scores: Array[Int]): (Int, Int) = {
 
     if (invalidValue(aliceValue)) throw new IllegalArgumentException("Wrong input")
 
@@ -27,14 +35,15 @@ object ClimbingLeaderboard {
       case Array(firstScore, _*) =>
         if (invalidValue(firstScore)) throw new IllegalArgumentException("Wrong input")
         if (aliceValue >= firstScore) {
-          positionNr
+          (positionNr, index)
         } else {
           scores.tail match {
-            case Array(nextValue, _*) => position(aliceValue, if (nextValue == firstScore) positionNr else positionNr + 1, scores.tail)
-            case _  => positionNr + 1
+            case Array(nextValue, _*) =>
+              positionWithIndex(aliceValue, if (nextValue == firstScore) positionNr else positionNr + 1, index + 1, scores.tail)
+            case _  => (positionNr + 1, index)
           }
         }
-      case _ => positionNr
+      case _ => (positionNr, index)
     }
 
 
