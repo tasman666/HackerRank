@@ -2,12 +2,13 @@ object MakingCandies {
 
   // Complete the minimumPasses function below.
   def minimumPasses(m: Long, w: Long, p: Long, n: Long): Long = {
-    if (invalid(m) || invalid(w) || invalid(p) || invalid(n)) throw new IllegalArgumentException("Invalid input")
+    if (invalid(m, w, p, n)) throw new IllegalArgumentException("Invalid input")
     minimumPasses(m,w,p,n, 0,0)
   }
 
-  private def invalid(value: Long): Boolean = {
-    value < 1 || value > Math.pow(10, 12)
+  private def invalid(values: Long*): Boolean = {
+    values.exists(value =>
+      value < 1 || value > Math.pow(10, 12))
   }
 
   @scala.annotation.tailrec
