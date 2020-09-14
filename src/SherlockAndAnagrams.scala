@@ -2,56 +2,54 @@
 
 object SherlockAndAnagrams {
 
-  implicit class RichInt(val n : Int) {
-    def ! : Int = (1 to n).product
-  }
-
 
   // Complete the sherlockAndAnagrams function below.
   def sherlockAndAnagrams(s: String): Int = {
-    var result = 0
 
-    val map = s.foldLeft( (Set[String](),Map[String, Int]()) ) ( (tuple, char) => {
-      val keys = tuple._1
-      val keysWithCounts = tuple._2
+    var keys = Seq[String]()
+    val allTokens = s.foldLeft(Seq[String]()) ( (tokens, char) => {
+      val newTokens = Seq("" + char) ++ keys.map(_ + char)
 
-      val newKeysWithCounts = keys.map(f = key => {
-        key + "" + char -> (keysWithCounts.getOrElse(key + "" + char, 0) + 1)
-      })
+      keys = newTokens
+      newTokens ++ tokens
 
-      val resultMap: Map[String, Int] = {
-        keysWithCounts ++ newKeysWithCounts + ("" + char -> (keysWithCounts.getOrElse("" + char, 0) + 1))
-      }
-
-      val newKeys = newKeysWithCounts.map(_._1) + ("" + char)
-      println(newKeys)
-      (newKeys, resultMap)
     })
+    findAnagrams(allTokens,Seq()).size
+  }
 
-    val counts = map._2
+  @scala.annotation.tailrec
+  private def findAnagrams(source: Seq[String], anagrams: Seq[String]): Seq[String] = {
+    source match {
+      case Nil => anagrams
+      case head :: tail =>  findAnagrams(tail, anagrams ++ checkAnagrams(head, tail))
+    }
+  }
 
-    println(counts)
-    val set = scala.collection.mutable.HashSet[String]()
-    counts.foreach( a => {
-      val token = a._1
-      val value = a._2
-      if (token == token.reverse) {
-        val valueToAdd = if(value > 1) (value - 1)! else 0
-        result += valueToAdd
+  private def checkAnagrams(source: String, tokens: Seq[String]): Seq[String] = {
+    tokens.filter(token => {
+      if (token.length == source.length) {
+
+        isAnagram(source, token)
+
       } else {
-        if(!set.contains(token)) {
-          val reverseValue = counts.getOrElse(token.reverse, 0)
-          val valueToAdd = if(value + reverseValue > 1) (value + reverseValue - 1)! else 0
-          result += valueToAdd
-          set += token
-          set += token.reverse
+        false
+      }
+    })
+  }
+
+  private def isAnagram(source: String, target: String): Boolean = {
+    var tokenVar = target
+    for (i <- source.indices) {
+      val index = tokenVar.indexOf(source.charAt(i))
+      if (index == -1) {
+        return false
+      } else {
+        if (tokenVar.length != 1) {
+          tokenVar = tokenVar.substring(0, index) + tokenVar.substring(index + 1)
         }
       }
-    })
-
-
-
-    result
+    }
+    true
   }
 
 
