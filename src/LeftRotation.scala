@@ -5,10 +5,9 @@ object LeftRotation {
   // Complete the rotLeft function below.
   def rotLeft(a: Array[Int], d: Int): Array[Int] = {
 
-    a.zipWithIndex.map( indexWithValue => {
-      val index = indexWithValue._2
+    a.zipWithIndex.map { case (_, index) =>
       a((index + d) % a.length)
-    })
+    }
 
   }
 
