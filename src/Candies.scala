@@ -2,12 +2,12 @@ object Candies {
 
   // Complete the candies function below.
   def candies(n: Int, arr: Array[Int]): Long = {
-    var candies: Array[Int] = Array.ofDim(arr.length)
+    var candies: Array[Long] = Array.ofDim(arr.length)
     getMaxFromRight(arr, candies, 0)
     candies.sum
   }
 
-  private def getMaxFromRight(input: Array[Int], candies: Array[Int], idx: Int): Int = {
+  private def getMaxFromRight(input: Array[Int], candies: Array[Long], idx: Int): Long = {
     if (idx - 1 >= 0 && idx + 1 < input.length && input(idx - 1) < input(idx) && input(idx) > input(idx + 1)) {
       candies(idx) = Math.max(candies(idx-1), getMaxFromRight(input, candies, idx + 1)) + 1
     } else if (idx + 1 < input.length && input(idx + 1) < input(idx)) {
@@ -34,6 +34,7 @@ object Candies {
     println(candies(3, Array(9,6,3))) // 6
     println(candies(4, Array(9,6,3, 5))) // 8
     println(candies(4, Array(9,6,7, 5))) // 6
+    println(candies(4, Array(1,2,3, 4))) // 10
   }
 }
 
