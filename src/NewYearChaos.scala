@@ -2,18 +2,21 @@ object NewYearChaos {
 
   // Complete the minimumBribes function below.
   def minimumBribes(q: Array[Int]): Unit = {
-    println(minimumBribesInternal(q, "0"))
+    println(minimumBribesInternal(q, 1, 2,3,"0"))
   }
 
   @scala.annotation.tailrec
-  def minimumBribesInternal(q: Array[Int], resultString: String): String = {
+  def minimumBribesInternal(q: Array[Int], expectedFirst: Int, expectedSecond: Int, expectedThird: Int, resultString: String): String = {
     q match {
       case Array(itemA, _*) =>
-        val result = q.tail.count(_ < itemA)
-        if (result > 2) {
-          "Too chaotic"
+        if (itemA == expectedFirst) {
+          minimumBribesInternal(q.tail, expectedSecond, expectedThird, expectedThird + 1, resultString)
+        } else if (itemA == expectedSecond) {
+          minimumBribesInternal(q.tail, expectedFirst, expectedThird, expectedThird + 1, (resultString.toInt + 1).toString)
+        } else if (itemA == expectedThird) {
+          minimumBribesInternal(q.tail, expectedFirst, expectedSecond, expectedThird + 1, (resultString.toInt + 2).toString)
         } else {
-          minimumBribesInternal(q.tail, (resultString.toInt + result).toString)
+          "Too chaotic"
         }
       case _ => resultString
     }
