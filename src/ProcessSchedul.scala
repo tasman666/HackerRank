@@ -34,8 +34,9 @@ object Solution2 {
   def main(args: Array[String]) {
     System.out.println(Result.minimumTime(Array(2, 1, 5, 3, 1), 17))// 9
     System.out.println(Result.minimumTime(Array(3, 1, 7, 2, 4), 15)) // 4
+    val array = createArray(20000000)
     val time = System.currentTimeMillis()
-    System.out.println(Result.minimumTime(createArray(2000000), 200000000L))
+    System.out.println(Result.minimumTime(array, 200000000L))
     System.out.println(s"Time is ${System.currentTimeMillis() - time}")
   }
 
