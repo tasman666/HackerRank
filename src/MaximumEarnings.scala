@@ -1,4 +1,5 @@
 import scala.collection.mutable
+import scala.util.Random
 
 object Result2 {
 
@@ -12,40 +13,43 @@ object Result2 {
    *  3. INTEGER_ARRAY tip
    */
 
-  case class Range(min: Long, max: Long)
-
-  case class Earn(ranges: List[Range], money: Long) {
-
-    def overlap(newPickup: Long, newDrop: Long): Boolean = ranges.exists(range => (range.min <= newPickup && newPickup < range.max) || (range.min < newDrop && newDrop <= range.max))
-
+  case class Earn(pickup: Long, drop: Long, money: Long) {
+    def overlap(earn: Earn): Boolean = earn.pickup < drop
   }
 
-
-
   implicit object EarnOrdering extends Ordering[Earn] {
+    def compare(a:Earn, b:Earn): Int = a.pickup compare b.pickup
+  }
+
+  object EarnOrderingMoney extends Ordering[Earn] {
     def compare(a:Earn, b:Earn): Int = a.money compare b.money
   }
 
   def taxiDriver(pickup: Array[Long], drop: Array[Long], tip: Array[Int]): Long = {
-    var earns = mutable.Seq[Earn]()
+    val earns = mutable.TreeSet[Earn]()
     for(i <- pickup.indices) {
-      earns = updateRanges(earns, pickup(i), drop(i), tip(i))
-     // println(earns)
+      val money = drop(i) - pickup(i) + tip(i)
+      earns.add( Earn(pickup(i), drop(i), money) )
     }
-    earns.max.money
+
+    var earnChains = mutable.Seq[Earn]()
+    earns.foreach(earn => earnChains = updateEarnChains(earnChains, earn))
+    earnChains.max(EarnOrderingMoney).money
   }
 
-  def updateRanges(earns: mutable.Seq[Earn], pickup: Long, drop: Long, tip: Int): mutable.Seq[Earn] = {
+  def updateEarnChains(earns: mutable.Seq[Earn], earn: Earn): mutable.Seq[Earn] = {
     var result = earns
-    val money = drop - pickup + tip
-
     for(i <- earns.indices) {
-      if (!earns(i).overlap(pickup, drop)) {
-        result = result :+ Earn(earns(i).ranges ++ List(Range(pickup, drop)), earns(i).money + money)
+      if (!earns(i).overlap(earn)) {
+        result = result :+ Earn(earns(i).pickup, earn.drop, earns(i).money + earn.money)
       }
     }
 
-    result :+ Earn(List(Range(pickup, drop)), money)
+    result = result :+ earn
+    val rest = if (result.exists(e => e.drop <= earn.pickup)) {
+      Seq(result.filter(e => e.drop <= earn.pickup).max(EarnOrderingMoney))
+    } else  Seq()
+    result.filter(e => e.drop > earn.pickup) ++ rest
   }
 
 }
@@ -53,6 +57,30 @@ object Result2 {
 object Solution {
   def main(args: Array[String]) {
     System.out.println(Result2.taxiDriver(Array(11, 30, 0, 21, 41, 19), Array(20, 31, 17, 22, 46, 21), Array(6, 1, 9, 0, 8, 0))) //44
+
+
+    val (pick,drop) = createArrays(10000)
+    val tip = createArray(10000)
+    val time = System.currentTimeMillis()
+    System.out.println(Result2.taxiDriver(pick, drop, tip))
+    System.out.println(s"Time is ${System.currentTimeMillis() - time}")
+  }
+
+  def createArrays(size: Int): (Array[Long],Array[Long]) = {
+    val pick = Array.ofDim[Long](size)
+    val drop = Array.ofDim[Long](size)
+    (0 until size).toArray.foreach {
+      i => {
+        val randomValue = Random.nextLong()
+        pick.update(i, randomValue)
+        drop.update(i, randomValue + Random.nextInt(10))
+      }
+    }
+    (pick, drop)
+  }
+
+  def createArray(size: Int): Array[Int] = {
+    (0 until size).toArray.map(i => Random.nextInt(i + 100))
   }
 }
 
